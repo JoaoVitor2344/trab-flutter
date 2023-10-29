@@ -76,12 +76,12 @@ class ListaDeTarefasScreenState extends State<ListaDeTarefasScreen> {
       concluida: false,
     );
 
-    await dabase.inserirTarefa(novaTarefa).then((_) => _carregarTarefas());
+    await database.inserirTarefa(novaTarefa).then((_) => _carregarTarefas());
     _controller.clear();
   }
 
   Future<void> _removerTarefa(Tarefa tarefa) async {
-    await dabase
+    await database
         .deletarTarefa(
           TarefasCompanion(
             id: Value(tarefa.id),
