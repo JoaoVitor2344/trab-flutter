@@ -1,172 +1,366 @@
 import 'package:flutter/material.dart';
-import 'package:drift/drift.dart' hide Column;
-import 'drift.dart';
 
 void main() {
-  runApp(const ListaDeTarefasApp());
+  runApp(MyApp());
 }
 
-class ListaDeTarefasApp extends StatelessWidget {
-  const ListaDeTarefasApp({super.key});
+class User {
+  String id;
+  String name;
+  String email;
 
+  User({required this.id, required this.name, required this.email});
+}
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lista de Tarefas App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const TelaInicial(),
+      home: UserList(),
     );
   }
 }
 
-class TelaInicial extends StatelessWidget {
-  const TelaInicial({super.key});
+class UserList extends StatefulWidget {
+  @override
+  _UserListState createState() => _UserListState();
+}
+
+class _UserListState extends State<UserList> {
+  List<User> users = [
+    User(id: '1', name: 'João', email: 'joao@email.com'),
+    User(id: '2', name: 'Maria', email: 'maria@email.com'),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('tela inicial'),
-        ),
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const ListaDeTarefasScreen(),
-              ));
+      appBar: AppBar(
+        title: Text('Lista de Usuários'),
+      ),
+      body: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(users[index].name),
+            subtitle: Text(users[index].email),
+            onTap: () {
+              _navigateToUserDetails(context, users[index]);
             },
-            child: const Text('Iniciar uma lista de tarefas'),
-          ),
-        ));
-  }
-}
-
-class ListaDeTarefasScreen extends StatefulWidget {
-  const ListaDeTarefasScreen({super.key});
-
-  @override
-  ListaDeTarefasScreenState createState() => ListaDeTarefasScreenState();
-}
-
-class ListaDeTarefasScreenState extends State<ListaDeTarefasScreen> {
-  final List<Tarefa> _tarefas = [];
-  final TextEditingController _controller = TextEditingController();
-  final database = AppDatabase();
-
-  @override
-  void initState() {
-    super.initState();
-    _carregarTarefas();
-  }
-
-  Future<void> _carregarTarefas() async {
-    await database.pegarTodasTarefas().then((tarefas) {
-      setState(
-        () {
-          _tarefas.clear();
-          _tarefas.addAll(tarefas);
-        },
-      );
-    });
-  }
-
-  Future<void> _adicionarTarefa(String descricao) async {
-    final novaTarefa = TarefasCompanion.insert(
-      descricao: descricao,
-      concluida: false,
-    );
-
-    await database.inserirTarefa(novaTarefa).then((_) => _carregarTarefas());
-    _controller.clear();
-  }
-
-  Future<void> _removerTarefa(Tarefa tarefa) async {
-    await database
-        .deletarTarefa(
-          TarefasCompanion(
-            id: Value(tarefa.id),
-            descricao: Value(tarefa.descricao),
-            concluida: Value(tarefa.concluida),
-          ),
-        )
-        .then((_) => _carregarTarefas());
-  }
-
-  Future<void> _atualizarTarefa(Tarefa tarefa) async {
-    final tarefaAlterada = TarefasCompanion(
-      id: Value(tarefa.id),
-      descricao: Value(tarefa.descricao),
-      concluida: Value(tarefa.concluida),
-    );
-    await database
-        .atualizarTarefa(tarefaAlterada)
-        .then((_) => _carregarTarefas());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Lista de Tarefas')),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _tarefas.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                    title: Text(_tarefas[index].descricao),
-                    leading: Checkbox(
-                      value: _tarefas[index].concluida,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          _tarefas[index].concluida = newValue ?? false;
-                          _atualizarTarefa(_tarefas[index]);
-                        });
-                      },
-                    ),
-                    trailing: IconButton(
-                        onPressed: () {
-                          _removerTarefa(_tarefas[index]);
-                        },
-                        icon: const Icon(Icons.delete)));
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    onSubmitted: (descricao) {
-                      _adicionarTarefa(descricao);
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Adicionar Tarefa',
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  child: const Text('Adicionar'),
+                IconButton(
+                  icon: Icon(Icons.edit),
                   onPressed: () {
-                    if (_controller.text.isNotEmpty) {
-                      _adicionarTarefa(_controller.text);
-                    }
+                    _navigateToEditUser(context, users[index]);
                   },
-                )
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    _confirmDeleteUser(context, users[index]);
+                  },
+                ),
               ],
             ),
-          ),
-        ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _navigateToCreateUser(context);
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
 
+  // Métodos para navegação
+
+  // Navega para os detalhes do usuário
+  void _navigateToUserDetails(BuildContext context, User user) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserDetails(user: user),
+      ),
+    );
+  }
+
+  // Navega para a página de edição do usuário
+  void _navigateToEditUser(BuildContext context, User user) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditUser(user: user)),
+    );
+
+    if (result != null && result is User) {
+      setState(() {
+        int index = users.indexWhere((element) => element.id == result.id);
+        if (index != -1) {
+          users[index] = result;
+        }
+      });
+    }
+  }
+
+  // Mostra um diálogo para confirmar a exclusão do usuário
+  void _confirmDeleteUser(BuildContext context, User user) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmação'),
+          content: Text('Tem certeza de que deseja excluir este usuário?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteUser(context, user);
+              },
+              child: Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Deleta o usuário
+  void _deleteUser(BuildContext context, User user) {
+    setState(() {
+      users.remove(user);
+      Navigator.of(context).pop(); // Fecha o diálogo
+    });
+  }
+
+  // Navega para a página de criação de um novo usuário
+  void _navigateToCreateUser(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CreateUser()),
+    );
+
+    if (result != null && result is User) {
+      setState(() {
+        users.add(result);
+      });
+    }
+  }
+}
+
+class UserDetails extends StatelessWidget {
+  final User user;
+
+  UserDetails({required this.user});
+
   @override
-  void dispose() {
-    _controller.dispose();
-    database.close();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Detalhes do Usuário'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('ID: ${user.id}'),
+            Text('Nome: ${user.name}'),
+            Text('Email: ${user.email}'),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    _navigateToEditUser(context, user);
+                  },
+                  child: Text('Editar'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _confirmDeleteUser(context, user);
+                  },
+                  child: Text('Excluir'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Navega para a página de edição do usuário
+  void _navigateToEditUser(BuildContext context, User user) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditUser(user: user)),
+    );
+
+    if (result != null && result is User) {
+      // Lidar com a atualização se necessário
+      // Para este exemplo, não é necessário, pois os detalhes são estáticos
+    }
+  }
+
+  // Mostra um diálogo para confirmar a exclusão do usuário
+  void _confirmDeleteUser(BuildContext context, User user) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmação'),
+          content: Text('Tem certeza de que deseja excluir este usuário?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteUser(context, user);
+              },
+              child: Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Deleta o usuário
+  void _deleteUser(BuildContext context, User user) {
+    // Para este exemplo, isso apenas fecha a rota atual
+    Navigator.of(context).pop();
+    // Você deve implementar sua lógica real de exclusão aqui
+    // Exemplo: Modificar a lista 'users' e atualizar a interface usando setState
+  }
+}
+
+class EditUser extends StatefulWidget {
+  final User user;
+
+  EditUser({required this.user});
+
+  @override
+  _EditUserState createState() => _EditUserState();
+}
+
+class _EditUserState extends State<EditUser> {
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.user.name);
+    _emailController = TextEditingController(text: widget.user.email);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Editar Usuário'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Nome'),
+            ),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _editUser(context);
+              },
+              child: Text('Salvar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Edita as informações do usuário
+  void _editUser(BuildContext context) {
+    String name = _nameController.text;
+    String email = _emailController.text;
+
+    if (name.isNotEmpty && email.isNotEmpty) {
+      User updatedUser = User(id: widget.user.id, name: name, email: email);
+      Navigator.pop(context, updatedUser);
+    }
+  }
+}
+
+class CreateUser extends StatefulWidget {
+  @override
+  _CreateUserState createState() => _CreateUserState();
+}
+
+class _CreateUserState extends State<CreateUser> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Criar Usuário'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Nome'),
+            ),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _createUser(context);
+              },
+              child: Text('Salvar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Cria um novo usuário
+  void _createUser(BuildContext context) {
+    String name = _nameController.text;
+    String email = _emailController.text;
+
+    if (name.isNotEmpty && email.isNotEmpty) {
+      User newUser =
+          User(id: DateTime.now().toString(), name: name, email: email);
+      Navigator.pop(context, newUser);
+    }
   }
 }
