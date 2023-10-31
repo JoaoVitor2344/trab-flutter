@@ -1,27 +1,22 @@
-import 'user.dart';
+// import 'user.dart';
 
-class UserRepository {
-  List<User> users = [
-    User(id: '1', name: 'João', email: 'joao@email.com'),
-    User(id: '2', name: 'Maria', email: 'maria@email.com'),
-  ];
+// class UserRepository {
+//   final List<User> _users = [
+//     User(id: '1', name: 'João', email: 'joao@email.com', password: 'senha1'),
+//     User(id: '2', name: 'Maria', email: 'maria@email.com', password: 'senha2'),
+//   ];
 
-  List<User> getUsers() {
-    return users;
-  }
+//   User authenticate(String email, String password) {
+//     final user = _users.firstWhere(
+//       (user) => user.email == email && user.password == password,
+//     );
 
-  void createUser(User user) {
-    users.add(user);
-  }
-
-  void updateUser(User updatedUser) {
-    int index = users.indexWhere((element) => element.id == updatedUser.id);
-    if (index != -1) {
-      users[index] = updatedUser;
-    }
-  }
-
-  void deleteUser(User user) {
-    users.remove(user);
-  }
-}
+//     // ignore: unnecessary_null_comparison
+//     if (user != null) {
+//       return user;
+//     } else {
+//       throw Exception(
+//           'Usuário não encontrado'); // Lança uma exceção se o usuário não for encontrado
+//     }
+//   }
+// }

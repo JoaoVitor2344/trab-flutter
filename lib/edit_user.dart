@@ -11,14 +11,36 @@ class EditUser extends StatefulWidget {
 }
 
 class _EditUserState extends State<EditUser> {
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.user.name);
-    _emailController = TextEditingController(text: widget.user.email);
+    _nameController.text = widget.user.name;
+    _emailController.text = widget.user.email;
+    _passwordController.text =
+        widget.user.password; // Preencha o campo de senha
+  }
+
+  void _saveChanges() {
+    final String newName = _nameController.text;
+    final String newEmail = _emailController.text;
+    final String newPassword = _passwordController.text;
+
+    if (newName.isNotEmpty && newEmail.isNotEmpty) {
+      final User updatedUser = User(
+        id: widget.user.id,
+        name: newName,
+        email: newEmail,
+        password: newPassword, // Atualize a senha no objeto User
+      );
+
+      Navigator.pop(context, updatedUser);
+    } else {
+      // Lide com erros de entrada ou validação, se necessário
+    }
   }
 
   @override
@@ -40,26 +62,18 @@ class _EditUserState extends State<EditUser> {
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
             ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Senha'),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                _editUser(context);
-              },
-              child: Text('Salvar'),
+              onPressed: _saveChanges,
+              child: Text('Salvar Alterações'),
             ),
           ],
         ),
       ),
     );
-  }
-
-  void _editUser(BuildContext context) {
-    String name = _nameController.text;
-    String email = _emailController.text;
-
-    if (name.isNotEmpty && email.isNotEmpty) {
-      User updatedUser = User(id: widget.user.id, name: name, email: email);
-      Navigator.pop(context, updatedUser);
-    }
   }
 }

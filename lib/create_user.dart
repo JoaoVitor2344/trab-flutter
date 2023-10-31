@@ -9,6 +9,25 @@ class CreateUser extends StatefulWidget {
 class _CreateUserState extends State<CreateUser> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  void _createUser() {
+    final String name = _nameController.text;
+    final String email = _emailController.text;
+    final String password = _passwordController.text; // Obtém a senha
+
+    if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+      User newUser = User(
+        id: DateTime.now().toString(),
+        name: name,
+        email: email,
+        password: password, // Define a senha no objeto User
+      );
+      Navigator.pop(context, newUser);
+    } else {
+      // Lide com erros de entrada ou validação, se necessário
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,27 +48,18 @@ class _CreateUserState extends State<CreateUser> {
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
             ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Senha'),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                _createUser(context);
-              },
+              onPressed: _createUser,
               child: Text('Salvar'),
             ),
           ],
         ),
       ),
     );
-  }
-
-  void _createUser(BuildContext context) {
-    String name = _nameController.text;
-    String email = _emailController.text;
-
-    if (name.isNotEmpty && email.isNotEmpty) {
-      User newUser =
-          User(id: DateTime.now().toString(), name: name, email: email);
-      Navigator.pop(context, newUser);
-    }
   }
 }
