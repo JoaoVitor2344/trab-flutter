@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'user.dart';
-import 'user_list.dart'; // Importe o arquivo que contém a definição da classe UserList
+import 'user_list.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,7 +9,6 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Suponha que userList seja a lista de usuários que você deseja exibir.
     List<User> userList = [
       User(
           id: '1',
@@ -29,10 +28,6 @@ class MyApp extends StatelessWidget {
       // Adicione mais usuários conforme necessário
     ];
 
-    return MaterialApp(
-      home: UserList(
-          users:
-              userList), // Defina a tela de listagem de usuários como a tela inicial
-    );
+    return MaterialApp(home: UserList(users: userList));
   }
 }

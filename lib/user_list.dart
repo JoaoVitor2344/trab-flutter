@@ -19,7 +19,24 @@ class UserList extends StatelessWidget {
           return ListTile(
             title: Text(user.name),
             subtitle: Text(user.email),
-            // Você pode adicionar mais informações do usuário aqui
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    // Adicione a lógica de edição do usuário aqui
+                    // Você pode usar Navigator para navegar para a tela de edição
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    // Adicione a lógica de exclusão do usuário aqui
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
