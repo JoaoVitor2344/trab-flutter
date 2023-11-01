@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'user.dart';
+import 'user_repository.dart';
 
 class EditUser extends StatefulWidget {
   final User user;
@@ -20,8 +21,7 @@ class _EditUserState extends State<EditUser> {
     super.initState();
     _nameController.text = widget.user.name;
     _emailController.text = widget.user.email;
-    _passwordController.text =
-        widget.user.password; // Preencha o campo de senha
+    _passwordController.text = widget.user.password;
   }
 
   void _saveChanges() {
@@ -34,8 +34,11 @@ class _EditUserState extends State<EditUser> {
         id: widget.user.id,
         name: newName,
         email: newEmail,
-        password: newPassword, // Atualize a senha no objeto User
+        password: newPassword,
       );
+
+      // Utilize o UserRepository para atualizar o usuário
+      UserRepository().updateUser(updatedUser);
 
       Navigator.pop(context, updatedUser);
     } else {
