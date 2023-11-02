@@ -1,7 +1,20 @@
 import 'user.dart';
 
 class UserRepository {
+  int _nextUserId = 1;
   final List<User> _users = [];
+
+  int getNextUserId() {
+    // Verifica o ID do último usuário adicionado e atribui o próximo ID sequencial
+    if (_users.isNotEmpty) {
+      final lastUser = _users.last;
+      final lastUserId = int.tryParse(lastUser.id);
+      if (lastUserId != null) {
+        _nextUserId = lastUserId + 1;
+      }
+    }
+    return _nextUserId;
+  }
 
   UserRepository() {
     // Adicione alguns usuários iniciais
@@ -24,6 +37,7 @@ class UserRepository {
   }
 
   void addUser(User user) {
+    user.id = getNextUserId().toString();
     _users.add(user);
   }
 
@@ -43,11 +57,6 @@ class UserRepository {
         userFound = true; // Defina a flag como true
         break;
       }
-    }
-
-    if (!userFound) {
-      print("Usuário não encontrado para atualização");
-      // Você pode optar por lidar com isso de outras maneiras, como registrar um erro ou enviar uma notificação
     }
   }
 }

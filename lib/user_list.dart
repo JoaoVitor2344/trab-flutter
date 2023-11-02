@@ -3,6 +3,7 @@ import 'user.dart';
 import 'user_repository.dart';
 import 'edit_user.dart';
 import 'delete_user.dart';
+import 'create_user.dart'; // Importe a tela de criação de usuário, se ainda não tiver sido criada.
 
 class UserList extends StatefulWidget {
   final UserRepository userRepository;
@@ -80,6 +81,27 @@ class _UserListState extends State<UserList> {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navegue para a tela de criação de usuário quando o botão "Create" for pressionado.
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  CreateUser(userRepository: widget.userRepository),
+            ),
+          ).then((createdUser) {
+            // Você pode tratar o novo usuário criado aqui, se necessário.
+            if (createdUser != null) {
+              setState(() {
+                widget.users
+                    .add(createdUser); // Adiciona o novo usuário à lista
+              });
+            }
+          });
+        },
+        child: Icon(Icons.add),
       ),
     );
   }

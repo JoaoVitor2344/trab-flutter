@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'user.dart';
+import 'user_repository.dart';
 
 class CreateUser extends StatefulWidget {
+  final UserRepository userRepository;
+
+  CreateUser({required this.userRepository});
+
   @override
   _CreateUserState createState() => _CreateUserState();
 }
@@ -10,24 +15,7 @@ class _CreateUserState extends State<CreateUser> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  void _createUser() {
-    final String name = _nameController.text;
-    final String email = _emailController.text;
-    final String password = _passwordController.text; // Obtém a senha
-
-    if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
-      User newUser = User(
-        id: DateTime.now().toString(),
-        name: name,
-        email: email,
-        password: password, // Define a senha no objeto User
-      );
-      Navigator.pop(context, newUser);
-    } else {
-      // Lide com erros de entrada ou validação, se necessário
-    }
-  }
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -36,29 +24,68 @@ class _CreateUserState extends State<CreateUser> {
         title: Text('Criar Usuário'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Nome'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Senha'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _createUser,
-              child: Text('Salvar'),
-            ),
-          ],
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey, // Adicionando um GlobalKey para o formulário
+          child: Column(
+            children: <Widget>[
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Nome'),
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return 'O nome é obrigatório.';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return 'O email é obrigatório.';
+                  }
+                  // Adicione validações adicionais de e-mail aqui, se necessário.
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'Senha'),
+                obscureText: true,
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return 'A senha é obrigatória.';
+                  }
+                  // Adicione validações adicionais de senha aqui, se necessário.
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            // Valida os campos do formulário
+            // Crie um novo usuário com os dados inseridos pelo usuário
+            User newUser = User(
+              id: '', // Lembre-se de fornecer um ID se necessário
+              name: _nameController.text,
+              email: _emailController.text,
+              password: _passwordController.text,
+            );
+
+            // Adicione o novo usuário ao user_repository
+            widget.userRepository.addUser(newUser);
+
+            // Navegue de volta para a tela anterior
+            Navigator.pop(context, newUser);
+          }
+        },
+        child: Icon(Icons.save),
       ),
     );
   }
