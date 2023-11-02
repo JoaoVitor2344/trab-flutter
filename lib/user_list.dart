@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
 import 'user.dart';
+import 'user_repository.dart';
 import 'edit_user.dart';
+import 'delete_user.dart';
 
 class UserList extends StatefulWidget {
+  final UserRepository userRepository;
   List<User> users;
 
-  UserList({required this.users});
+  UserList({
+    required this.userRepository,
+    required this.users,
+  });
 
   @override
   _UserListState createState() => _UserListState();
 }
 
 class _UserListState extends State<UserList> {
-  void _updateUser(User updatedUser) {
-    setState(() {
-      // Encontre e substitua o usuário antigo pelo usuário atualizado
-      final index =
-          widget.users.indexWhere((user) => user.id == updatedUser.id);
-      if (index != -1) {
-        widget.users[index] = updatedUser;
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,6 +28,7 @@ class _UserListState extends State<UserList> {
         itemCount: widget.users.length,
         itemBuilder: (context, index) {
           final user = widget.users[index];
+
           return ListTile(
             title: Text(user.name),
             subtitle: Text(user.email),
@@ -49,7 +45,13 @@ class _UserListState extends State<UserList> {
                       ),
                     ).then((updatedUser) {
                       if (updatedUser != null) {
-                        _updateUser(updatedUser);
+                        setState(() {
+                          final index = widget.users
+                              .indexWhere((u) => u.id == updatedUser.id);
+                          if (index != -1) {
+                            widget.users[index] = updatedUser;
+                          }
+                        });
                       }
                     });
                   },
@@ -57,7 +59,21 @@ class _UserListState extends State<UserList> {
                 IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () {
-                    // Implemente a lógica de exclusão aqui
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DeleteUser(
+                          user: user,
+                          userRepository: widget.userRepository,
+                          onDeleteUser: (deletedUser) {
+                            setState(() {
+                              widget.users
+                                  .removeWhere((u) => u.id == deletedUser.id);
+                            });
+                          },
+                        ),
+                      ),
+                    );
                   },
                 ),
               ],

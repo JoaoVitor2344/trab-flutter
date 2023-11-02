@@ -4,18 +4,18 @@ import 'user_list.dart';
 import 'user_repository.dart';
 
 void main() {
-  List<User> users = UserRepository().getUsers();
-
-  runApp(MyApp(users: users));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final List<User> users; // Altere a declaração para uma lista de usuários
-
-  const MyApp({required this.users});
+  final UserRepository userRepository = UserRepository();
+  final List<User> users = UserRepository()
+      .getUsers(); // Obtenha a lista de usuários do UserRepository
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: UserList(users: users));
+    return MaterialApp(
+      home: UserList(userRepository: userRepository, users: users),
+    );
   }
 }
