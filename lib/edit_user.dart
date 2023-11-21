@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'user.dart';
 import 'user_repository.dart';
+import 'persistencia.dart';
 
 class EditUser extends StatefulWidget {
   final User user;
@@ -19,12 +20,23 @@ class _EditUserState extends State<EditUser> {
   @override
   void initState() {
     super.initState();
-    _nameController.text = widget.user.name;
-    _emailController.text = widget.user.email;
-    _passwordController.text = widget.user.password;
+    loadUserData();
   }
 
-  void _saveChanges() {
+  void loadUserData() async {
+    // Carregue os dados do usuário usando a classe LocalDate
+    final String name = this.widget.user.name;
+    final String email = this.widget.user.email;
+    final String password = this.widget.user.password;
+
+    setState(() {
+      _nameController.text = name;
+      _emailController.text = email;
+      _passwordController.text = password;
+    });
+  }
+
+  void _saveChanges() async {
     final String newName = _nameController.text;
     final String newEmail = _emailController.text;
     final String newPassword = _passwordController.text;
@@ -40,6 +52,14 @@ class _EditUserState extends State<EditUser> {
       // Utilize o UserRepository para atualizar o usuário
       UserRepository().updateUser(updatedUser);
 
+      // Salve os dados atualizados usando a classe LocalDate
+      await LocalDate.salvarString(
+        updatedUser.name,
+        updatedUser.email,
+        updatedUser.password,
+      );
+
+      // Navegue de volta para a tela anterior
       Navigator.pop(context, updatedUser);
     } else {
       // Lide com erros de entrada ou validação, se necessário
@@ -68,6 +88,7 @@ class _EditUserState extends State<EditUser> {
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(labelText: 'Senha'),
+              obscureText: true,
             ),
             SizedBox(height: 20),
             ElevatedButton(

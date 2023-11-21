@@ -11,18 +11,21 @@ class User {
     required this.password,
   });
 
-  factory User.fromString(String str) {
-    final List<String> fields = str.split(',');
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: fields[0],
-      name: fields[1],
-      email: fields[2],
-      password: fields[3],
+      id: json['id'] as String,
+      name: json['name'] as String,
+      email: json['email'] as String,
+      password: json['password'] as String,
     );
   }
 
-  @override
-  String toString() {
-    return 'id: $id, name: $name, email: $email, password: $password';
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'password': password,
+    };
   }
 }

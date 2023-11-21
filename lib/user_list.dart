@@ -3,8 +3,9 @@ import 'user.dart';
 import 'user_repository.dart';
 import 'edit_user.dart';
 import 'delete_user.dart';
-import 'create_user.dart'; // Importe a tela de criação de usuário, se ainda não tiver sido criada.
+import 'create_user.dart'; // Import the user creation screen if it hasn't been created yet.
 
+// ignore: must_be_immutable
 class UserList extends StatefulWidget {
   final UserRepository userRepository;
   List<User> users;
@@ -38,43 +39,47 @@ class _UserListState extends State<UserList> {
               children: [
                 IconButton(
                   icon: Icon(Icons.edit),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final updatedUser = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => EditUser(user: user),
                       ),
-                    ).then((updatedUser) {
-                      if (updatedUser != null) {
-                        setState(() {
-                          final index = widget.users
-                              .indexWhere((u) => u.id == updatedUser.id);
-                          if (index != -1) {
-                            widget.users[index] = updatedUser;
-                          }
-                        });
-                      }
-                    });
+                    );
+
+                    if (updatedUser != null) {
+                      setState(() {
+                        final index = widget.users
+                            .indexWhere((u) => u.id == updatedUser.id);
+                        if (index != -1) {
+                          widget.users[index] = updatedUser;
+                        }
+                      });
+                    }
                   },
                 ),
                 IconButton(
                   icon: Icon(Icons.delete),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final deletedUser = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DeleteUser(
                           user: user,
                           userRepository: widget.userRepository,
-                          onDeleteUser: (deletedUser) {
+                          onDeleteUser: (removedUser) {
                             setState(() {
                               widget.users
-                                  .removeWhere((u) => u.id == deletedUser.id);
+                                  .removeWhere((u) => u.id == removedUser.id);
                             });
                           },
                         ),
                       ),
                     );
+
+                    if (deletedUser != null) {
+                      // Handle the deleted user if necessary.
+                    }
                   },
                 ),
               ],
@@ -84,19 +89,18 @@ class _UserListState extends State<UserList> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navegue para a tela de criação de usuário quando o botão "Create" for pressionado.
+          // Navigate to the user creation screen when the "Create" button is pressed.
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  CreateUser(userRepository: widget.userRepository),
+              builder: (context) => CreateUser(
+                userRepository: widget.userRepository,
+              ),
             ),
           ).then((createdUser) {
-            // Você pode tratar o novo usuário criado aqui, se necessário.
             if (createdUser != null) {
               setState(() {
-                widget.users
-                    .add(createdUser); // Adiciona o novo usuário à lista
+                widget.users.add(createdUser); // Add the new user to the list
               });
             }
           });
